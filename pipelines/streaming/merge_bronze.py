@@ -108,12 +108,14 @@ def decode(row, at, attempt, batch_id, source):
         return [dict(receipt, reason="unsupported_operation")]
     source, before, after = body.get("source"), body.get("before"), body.get("after")
     fixed = {"name": "stokora", "db": "stokora", "schema": "operational", "table": "sales_events"}
+    snapshot = source.get("snapshot") if type(source) is dict else None
+    initial_snapshot = snapshot is True or snapshot in ("first", "true", "last")
     if (type(source) is not dict or not all(source.get(k) == v for k, v in fixed.items())
             or not all(k in body for k in ("before", "after"))
             or not integer(source.get("lsn")) or not integer(source.get("ts_ms"))
             or not integer(body.get("ts_ms"))
             or not (integer(source.get("txId")) or op == "r" and source.get("txId") is None)
-            or (op == "r") != (source.get("snapshot") in ("true", "last", True))):
+            or (op == "r") != initial_snapshot):
         return [dict(receipt, reason="invalid_source")]
     needs_before, needs_after = op in ("u", "d"), op in ("r", "c", "u")
     if (not (valid_state(before, key) if needs_before else before is None)

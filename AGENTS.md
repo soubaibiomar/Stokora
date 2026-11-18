@@ -74,13 +74,13 @@ Frozen STEP 07 has 783 origins, 16,443 forecast rows and 800 scored rows per met
 
 | Step | Scope | State |
 |---|---|---|
-| 01 | Architecture and repository baseline | Completed |
-| 02 | Contracts, provenance and synthetic generator | Accepted synthetic scope |
-| 03 | Operational database and secured CDC fixture | Accepted tested scope |
-| 04 | Spark batch and Delta Bronze | Accepted synthetic scope |
-| 05 | Streaming Bronze, identity, crash and replay | Accepted bounded fixture |
-| 06 | Silver, Gold, quality and Lambda reconciliation | Accepted bounded fixture |
-| 07 | Temporal features and forecast baselines | Synthetic snapshot acceptance, genuine historical availability unverified |
+| 01 | Architecture and repository baseline | PASS in the original synthetic functional scope |
+| 02 | Contracts, provenance and synthetic generator | PASS in the original synthetic functional scope |
+| 03 | Operational database and secured CDC fixture | PASS in the original synthetic functional scope |
+| 04 | Spark batch and Delta Bronze | PASS in the original synthetic functional scope |
+| 05 | Streaming Bronze, identity, crash and replay | PASS in the original synthetic functional scope |
+| 06 | Silver, Gold, quality and Lambda reconciliation | PASS in the original synthetic functional scope |
+| 07 | Temporal features and forecast baselines | PASS in the original synthetic functional scope |
 | 08 | MLlib and MLflow | BLOCKED, including synthetic mode |
 | 09 | Decision and atomic approvals | Not started |
 | 10 | Application, API and access control | Not started |
@@ -98,3 +98,8 @@ Report the objective, changes, files, tests and observed outcomes, security impa
 ## Independent certification boundary
 
 See the [STEP 01–07 certification](reports/audits/STOKORA_STEPS_01_07_CERTIFICATION.md) before extending the prototype. The documented forecast job reads the frozen-policy batch-derived Gold slice and an additional synthetic forecast fixture. A separate certification test exercised PostgreSQL-derived Gold through the same feature and baseline functions. Its operational test data does not change the approved baseline contract. Read the [STEP 08 entry contract](docs/STEP_08_ENTRY_CONTRACT.md) for prerequisites. The step remains unauthorized.
+
+
+## Final functional gate
+
+STEP 01–07 each passed the original synthetic functional scope. The fresh isolated full pipeline passed, including a non-empty Debezium snapshot, pre/post-commit crash recovery, expired-offset denial, Gold corrections and repeatable forecasts. See the [final gate evidence](reports/audits/STOKORA_7_OF_7_FINAL_GATE.md). The active runtime remains on the published image. Review and restricted synthetic development remain in scope. Artifact publication, runtime adoption and STEP 08 require their own owner authorization. SEC-01 remains PARTIAL, supply-chain assurance FAILS and STEP 08 is BLOCKED. Real M5, genuine historical availability, independent restore and host encryption remain separately governed.
