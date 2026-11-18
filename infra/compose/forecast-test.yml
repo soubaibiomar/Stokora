@@ -1,0 +1,15 @@
+# Disposable STEP 07 fixture. Only the approved synthetic inputs are mounted.
+services:
+  spark:
+    labels:
+      org.stokora.lifecycle: disposable-step07
+    read_only: true
+    environment:
+      JAVA_TOOL_OPTIONS: -Dorg.xerial.snappy.tempdir=/native
+    tmpfs:
+      - /native:rw,exec,nosuid,nodev,size=8m,mode=1777
+      - /tmp:rw,nosuid,nodev,size=1g,mode=1777
+    volumes:
+      - type: tmpfs
+        target: /home/jovyan/work
+        tmpfs: {size: 134217728, mode: 1777}

@@ -1,0 +1,44 @@
+# Local credentials
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.pfx
+*.p12
+.kaggle/
+kaggle.json
+
+# Data and runtime artifacts
+/data/*
+!/data/README.md
+!/data/manifests/
+/data/manifests/*
+!/data/manifests/m5-fixture.json
+
+# Licensed M5 filenames even outside data/local; only the exact synthetic fixtures are tracked.
+calendar.csv
+sell_prices.csv
+sales_train_*.csv
+sample_submission.csv
+!/tests/data/fixtures/m5/calendar.csv
+!/tests/data/fixtures/m5/sell_prices.csv
+!/tests/data/fixtures/m5/sales_train_validation.csv
+checkpoints/
+volumes/
+*.dump
+*.sql.gz
+*.sqlite*
+mlruns/
+mlartifacts/
+artifacts/
+logs/
+*.log
+.venv/
+/.serena/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
+.next/

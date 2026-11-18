@@ -1,0 +1,6 @@
+services:
+  spark:
+    image: ${STOKORA_SEC01_SPARK_IMAGE:?set the isolated Spark candidate}
+    pull_policy: never
+    environment:
+      PYTHONPATH: /workspace:/opt/stokora-gx:/opt/spark/python/lib/pyspark.zip:/opt/spark/python/lib/py4j-0.10.9.9-src.zip

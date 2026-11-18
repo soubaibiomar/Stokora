@@ -1,0 +1,19 @@
+{
+  "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+  "tasks.max": "1",
+  "database.hostname": "postgres",
+  "database.port": "5432",
+  "database.user": "stokora_cdc",
+  "database.password": "${file:/run/secrets/connect_database:password}",
+  "database.dbname": "stokora",
+  "plugin.name": "pgoutput",
+  "topic.prefix": "stokora",
+  "table.include.list": "operational.sales_events",
+  "publication.name": "stokora_sales",
+  "publication.autocreate.mode": "disabled",
+  "slot.name": "stokora_sales",
+  "slot.drop.on.stop": "false",
+  "snapshot.mode": "initial",
+  "tombstones.on.delete": "true",
+  "errors.tolerance": "none"
+}

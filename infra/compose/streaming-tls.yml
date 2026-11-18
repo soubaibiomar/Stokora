@@ -1,0 +1,14 @@
+services:
+  spark:
+    environment:
+      STOKORA_KAFKA_CA: /tls/ca.pem
+    volumes:
+      - type: volume
+        source: tls
+        target: /tls
+        read_only: true
+        volume: {subpath: trust}
+volumes:
+  tls:
+    external: true
+    name: ${STOKORA_TLS_VOLUME:?set the provisioned TLS material volume}

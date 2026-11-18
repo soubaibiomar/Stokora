@@ -1,0 +1,135 @@
+{
+  "adapter_version": 1,
+  "source_dataset": "m5_fixture",
+  "is_simulated": true,
+  "retrieved_on": null,
+  "source_terms": "Project-authored synthetic fixture",
+  "fact_grain": [
+    "source_dataset",
+    "store_id",
+    "product_id",
+    "business_date"
+  ],
+  "inputs": [
+    {
+      "file": "calendar.csv",
+      "sha256": "705a58a9cabe9a3a6f4e25e79bdddca32ba636fc8a76db5a73f1c21cdaed3e4c",
+      "bytes": 68,
+      "grain": "day",
+      "columns": [
+        "date",
+        "wm_yr_wk",
+        "d"
+      ]
+    },
+    {
+      "file": "sell_prices.csv",
+      "sha256": "fd9af9b2d0990e849f1cfa22985568120c35a0025c497aec5fa801569eae2ccc",
+      "bytes": 95,
+      "grain": "store/item/week",
+      "columns": [
+        "store_id",
+        "item_id",
+        "wm_yr_wk",
+        "sell_price"
+      ]
+    },
+    {
+      "file": "sales_train_validation.csv",
+      "sha256": "3046dfdb26c5c031665cfab3cf314ccca9301a19f1a7ac0fb90fb21802e3935d",
+      "bytes": 152,
+      "grain": "store/item series across days",
+      "columns": [
+        "id",
+        "item_id",
+        "dept_id",
+        "cat_id",
+        "store_id",
+        "state_id",
+        "d_1",
+        "d_2",
+        "d_3"
+      ]
+    }
+  ],
+  "profile": {
+    "calendar_rows": 3,
+    "price_rows": 3,
+    "series": 2,
+    "facts": 6,
+    "zero_sales": 2,
+    "missing_sales": 1,
+    "missing_calendar_days": 0,
+    "missing_price_values": 0,
+    "price_weeks_missing_calendar": 0,
+    "zero_sales_without_price": 1,
+    "positive_sales_without_price": 0,
+    "products": 2,
+    "stores": 2,
+    "first_date": "2024-01-06",
+    "last_date": "2024-01-08"
+  },
+  "fact_sha256": "966952d2e771c2f6f43c5456c9f3f89d8aff66bf191ba68c61d096aa267afdef",
+  "sample": [
+    {
+      "source_dataset": "m5_fixture",
+      "store_id": "FIX_A",
+      "product_id": "FIX_P",
+      "business_date": "2024-01-06",
+      "quantity": 2,
+      "unit": "each",
+      "sell_price": "2.50",
+      "currency": "USD",
+      "is_simulated": "true",
+      "source_release": "sales_train_validation"
+    },
+    {
+      "source_dataset": "m5_fixture",
+      "store_id": "FIX_A",
+      "product_id": "FIX_P",
+      "business_date": "2024-01-07",
+      "quantity": 0,
+      "unit": "each",
+      "sell_price": "2.50",
+      "currency": "USD",
+      "is_simulated": "true",
+      "source_release": "sales_train_validation"
+    },
+    {
+      "source_dataset": "m5_fixture",
+      "store_id": "FIX_A",
+      "product_id": "FIX_P",
+      "business_date": "2024-01-08",
+      "quantity": 3,
+      "unit": "each",
+      "sell_price": "3.00",
+      "currency": "USD",
+      "is_simulated": "true",
+      "source_release": "sales_train_validation"
+    },
+    {
+      "source_dataset": "m5_fixture",
+      "store_id": "FIX_B",
+      "product_id": "FIX_Q",
+      "business_date": "2024-01-06",
+      "quantity": 0,
+      "unit": "each",
+      "sell_price": null,
+      "currency": "USD",
+      "is_simulated": "true",
+      "source_release": "sales_train_validation"
+    },
+    {
+      "source_dataset": "m5_fixture",
+      "store_id": "FIX_B",
+      "product_id": "FIX_Q",
+      "business_date": "2024-01-07",
+      "quantity": null,
+      "unit": "each",
+      "sell_price": null,
+      "currency": "USD",
+      "is_simulated": "true",
+      "source_release": "sales_train_validation"
+    }
+  ]
+}

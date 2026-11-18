@@ -1,0 +1,36 @@
+name: stokora
+
+# Proposed per-profile aggregate ceilings for this 16 GB workstation.
+x-profile-budgets:
+  core: {cpus: 3, memory_mib: 3072}
+  processing: {cpus: 4, memory_mib: 5120}
+  orchestration: {cpus: 3, memory_mib: 4608}
+  app: {cpus: 2, memory_mib: 2560}
+  monitoring: {cpus: 1, memory_mib: 1024}
+  security: {cpus: 1, memory_mib: 1024}
+
+services:
+  postgres:
+    profiles: [core]
+    image: ${POSTGRES_IMAGE:?provide an approved PostgreSQL 16 image reference}
+    environment:
+      POSTGRES_DB: stokora
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: [postgres_password]
+    networks: [data]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    cpus: 1.0
+    mem_limit: 768m
+    security_opt: [no-new-privileges:true]
+
+networks:
+  data:
+    internal: true
+
+secrets:
+  postgres_password:
+    file: ${POSTGRES_PASSWORD_FILE:?provide the private bootstrap password file path}
+
+volumes:
+  postgres_data:

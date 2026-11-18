@@ -1,0 +1,4 @@
+store_id,item_id,wm_yr_wk,sell_price
+FIX_A,FIX_P,1,2.50
+FIX_A,FIX_P,2,3.00
+FIX_B,FIX_Q,2,4.25

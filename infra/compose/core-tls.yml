@@ -1,0 +1,46 @@
+# Overlay for the intended TLS core profile. Apply after compose.yaml and core.yml.
+services:
+  postgres:
+    command: [postgres, -c, wal_level=logical, -c, max_replication_slots=4, -c, max_wal_senders=4, -c, max_slot_wal_keep_size=512MB, -c, password_encryption=scram-sha-256, -c, ssl=on, -c, ssl_min_protocol_version=TLSv1.2, -c, ssl_cert_file=/tls/server.crt, -c, ssl_key_file=/tls/server.key, -c, hba_file=/tls/pg_hba.conf]
+    volumes:
+      - type: volume
+        source: tls
+        target: /tls
+        read_only: true
+        volume: {subpath: postgres}
+      - type: volume
+        source: tls
+        target: /trust
+        read_only: true
+        volume: {subpath: trust}
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d stokora"]
+  kafka:
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:SASL_SSL,CONTROLLER:SASL_SSL
+      KAFKA_SSL_KEYSTORE_TYPE: PEM
+      KAFKA_SSL_KEYSTORE_LOCATION: /tls/kafka.pem
+      KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /tls/ca.pem
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+    volumes:
+      - type: volume
+        source: tls
+        target: /tls
+        read_only: true
+        volume: {subpath: kafka}
+      - ../kafka/connectors/tls-client.sh:/opt/stokora/tls-client.sh:ro
+    healthcheck:
+      test: [CMD, sh, /opt/stokora/tls-client.sh, kafka-topics, --list]
+  connect:
+    entrypoint: [sh, /opt/stokora/connect-tls.sh]
+    volumes:
+      - type: volume
+        source: tls
+        target: /tls
+        read_only: true
+        volume: {subpath: trust}
+volumes:
+  tls:
+    external: true
+    name: ${STOKORA_TLS_VOLUME:?set the provisioned TLS material volume}
