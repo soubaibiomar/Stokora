@@ -17,3 +17,7 @@ The baseline is the published unified Compose milestone b9d41ed. Statuses apply 
 | P2 | Availability schema accepted coercible dates, malformed or negative revision keys. | Reject ambiguous types and negative revisions before point-in-time joining. Test UTC boundaries, tenant, late corrections and invalid inputs. | PASS on synthetic fixture |
 | P2 | Fresh developer setup and prior private evidence boundary. | Build and run a fresh checkout with no borrowed volumes. Document private frozen artifacts and prerequisites. | See readiness review |
 | P3 | Agent and developer onboarding lacked a root handover. | Add agent rules, entry-point commands, operational guide and checklist. Check links and commands. | Covered by this milestone |
+
+## Independent STEP 01–07 certification
+
+The independent review retained the SEC-01 PARTIAL and STEP 08 BLOCKED gates. It distinguished the supported benchmark workflow from a separate PostgreSQL-to-forecast synthetic oracle. The Gold synthetic product allowlist and published forecast input scope remain explicit. [Certification and requirements evidence](STOKORA_STEPS_01_07_CERTIFICATION.md) · [STEP 08 prerequisites](../../docs/STEP_08_ENTRY_CONTRACT.md)

@@ -79,3 +79,7 @@ Get-Content tests/integration/batch/test_disk_exhaustion.py -Raw |
 ~~~
 
 Expected results include an actual data-write ENOSPC, a metadata-only commit rejected at zero capacity, a readable previous version, and an idempotent append after space returns. Unreferenced files in a failed attempt can exist without a committed version.
+
+## Certification and transfer scope
+
+The [STEP 01–07 certification](../reports/audits/STOKORA_STEPS_01_07_CERTIFICATION.md) records where a fresh run, a retained result or an external blocker applies. A separate synthetic certification oracle proves the link from PostgreSQL-generated CDC through Gold to forecast calculations. The normal forecast command still produces the approved batch-derived benchmark. It does not automatically convert CDC into a training dataset. The [STEP 08 entry contract](STEP_08_ENTRY_CONTRACT.md) defines the gates and expected input contracts for a future owner-approved task.

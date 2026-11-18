@@ -94,3 +94,7 @@ Preserve protected Docker volumes, Kafka identity, databases, Delta snapshots an
 ## M. Completion reporting
 
 Report the objective, changes, files, tests and observed outcomes, security impact, remaining blockers, Git status and exact next action. State any skipped verification and material assumptions.
+
+## Independent certification boundary
+
+See the [STEP 01–07 certification](reports/audits/STOKORA_STEPS_01_07_CERTIFICATION.md) before extending the prototype. The documented forecast job reads the frozen-policy batch-derived Gold slice and an additional synthetic forecast fixture. A separate certification test exercised PostgreSQL-derived Gold through the same feature and baseline functions. Its operational test data does not change the approved baseline contract. Read the [STEP 08 entry contract](docs/STEP_08_ENTRY_CONTRACT.md) for prerequisites. The step remains unauthorized.

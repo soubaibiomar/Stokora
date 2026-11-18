@@ -22,3 +22,5 @@
 - [ ] Record handover decisions and use the normal owner-reviewed branch and PR workflow.
 
 [Developer handover](HANDOVER.md) · [Agent rules](../AGENTS.md)
+
+- [ ] Review the [independent certification](../reports/audits/STOKORA_STEPS_01_07_CERTIFICATION.md) and [STEP 08 entry contract](STEP_08_ENTRY_CONTRACT.md). A signed-off synthetic handover does not authorize STEP 08.
