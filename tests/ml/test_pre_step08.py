@@ -56,6 +56,10 @@ def check_as_of(spark):
         raise AssertionError("ambiguous revision accepted")
     print("PASS ambiguous revision fails closed")
     for source, dates, expected_error in (
+        (revisions.drop("revision"), origins, "invalid_availability_schema"),
+        (revisions.withColumn("revision", F.lit(float("nan"))), origins, "invalid_availability_schema"),
+        (revisions.withColumn("day", F.col("day").cast("string")), origins, "invalid_availability_schema"),
+        (revisions.withColumn("revision", F.lit(-1)), origins, "invalid_synthetic_availability"),
         (revisions.withColumn("available_at", F.lit(None).cast("timestamp_ntz")), origins,
          "invalid_synthetic_availability"),
         (revisions, origins.withColumn("origin", F.lit(None).cast("timestamp_ntz")), "invalid_forecast_origin"),

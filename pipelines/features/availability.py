@@ -6,7 +6,8 @@ with timestamps derived from business date or the latest snapshot publication.
 """
 
 from pyspark.sql import Window, functions as F
-from pyspark.sql.types import TimestampNTZType, TimestampType
+from pyspark.sql.types import (BooleanType, DateType, IntegralType, StringType,
+                               TimestampNTZType, TimestampType)
 
 from pipelines.features.forecast import KEY
 
@@ -19,6 +20,16 @@ def history_as_of(revisions, origins):
     after it becomes available. Conflicting revision identities fail closed.
     """
     identity = [*KEY, "day", "kind", "available_at", "revision"]
+    for frame, fields in (
+        (origins, {name: StringType for name in KEY}),
+        (revisions, {**{name: StringType for name in (*KEY, "kind", "state")},
+                     "day": DateType, "revision": IntegralType, "simulated": BooleanType}),
+    ):
+        if any(name not in frame.columns or not isinstance(frame.schema[name].dataType, kind)
+               for name, kind in fields.items()):
+            raise ValueError("invalid_availability_schema")
+    if "origin" not in origins.columns or "available_at" not in revisions.columns:
+        raise ValueError("invalid_availability_schema")
     clock = origins.schema["origin"].dataType
     if (not isinstance(clock, (TimestampType, TimestampNTZType))
             or revisions.schema["available_at"].dataType != clock
@@ -29,7 +40,7 @@ def history_as_of(revisions, origins):
         invalid_origin = invalid_origin | F.col(name).isNull()
     if origins.where(invalid_origin).limit(1).count():
         raise ValueError("invalid_forecast_origin")
-    invalid = F.col("simulated").isNull() | ~F.col("simulated")
+    invalid = F.col("simulated").isNull() | ~F.col("simulated") | (F.col("revision") < 0)
     for name in identity:
         invalid = invalid | F.col(name).isNull()
     if (revisions.where(invalid | ~F.coalesce(F.col("state").isin("accepted", "quarantined", "retracted"),

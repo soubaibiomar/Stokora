@@ -21,7 +21,8 @@ ADD --chmod=0444 --checksum=sha256:6d3bd18df8410f3e31b031aca582cc109342358a62a27
 ENV JAVA_HOME=/opt/java/openjdk SPARK_HOME=/opt/spark SPARK_LOCAL_IP=127.0.0.1 PYTHONDONTWRITEBYTECODE=1
 ENV PATH=/opt/java/openjdk/bin:/opt/kafka/bin:/opt/spark/bin:$PATH
 ENV PYTHONPATH=/app:/opt/gx:/opt/spark/python/lib/pyspark.zip:/opt/spark/python/lib/py4j-0.10.9.9-src.zip
-RUN chmod 0555 /opt/bronze-jars /opt/kafka-jars && ldconfig && for u in broker connector jobs reader forecast; do useradd -M -s /usr/sbin/nologin $u; done
+# service.py launches processes under their service UIDs. The inherited PostgreSQL entrypoint is unused.
+RUN rm /usr/local/bin/gosu && chmod 0555 /opt/bronze-jars /opt/kafka-jars && ldconfig && for u in broker connector jobs reader forecast; do useradd -M -s /usr/sbin/nologin $u; done
 RUN mkdir -p /home/jovyan && ln -s /var/lib/postgresql/data/forecast /home/jovyan/work && ln -s /var/lib/postgresql/data/reader /stream && ln -s /var/lib/postgresql/data/jobs /gold && ln -s /var/lib/postgresql/data/batch /batch && ln -s /app /workspace && ln -s /app/tests/data/fixtures/m5 /fixtures
 WORKDIR /app
 COPY . /app

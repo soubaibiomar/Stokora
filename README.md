@@ -60,3 +60,7 @@ Sur l’entrée Gold figée, la référence couvre 783 origines, 16 443 prévisi
 | Moyenne mobile | 0,7381 | 18,20 % |
 
 **SEC-01 reste PARTIAL et STEP 08 reste BLOCKED.** Les vulnérabilités de l’image empêchent sa promotion. Le droit d’utiliser le jeu M5 réel demeure à confirmer. Le parcours exploite les fixtures synthétiques livrées avec le code. [Guide Docker](reports/infrastructure/DOCKER_LIFECYCLE_GUIDE.md)
+
+## Developer handover
+
+Start with the [developer guide](docs/HANDOVER.md), [setup checklist](docs/HANDOVER_CHECKLIST.md), and [agent rules](AGENTS.md).
