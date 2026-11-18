@@ -1,0 +1,99 @@
+name: stokora-local
+x-runtime: &runtime
+  image: stokora:local
+  init: true
+  platform: linux/amd64
+  restart: "on-failure:2"
+  stop_signal: SIGTERM
+  stop_grace_period: 45s
+  read_only: true
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETUID, SETGID, KILL]
+  tmpfs:
+    - /var/lib/postgresql/data:rw,nosuid,nodev,size=8m,mode=755
+    - /run:rw,nosuid,nodev,size=32m,mode=755
+    - /tmp:rw,exec,nosuid,nodev,size=768m,mode=1777
+  networks: [data]
+  pids_limit: 512
+  logging:
+    options: {max-size: 8m, max-file: "3"}
+  healthcheck:
+    test: [CMD, stokora, status]
+    interval: 10s
+    timeout: 8s
+    retries: 6
+    start_period: 120s
+
+services:
+  postgres:
+    <<: *runtime
+    container_name: stokora-postgres
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+    command: [postgres]
+    environment: {STOKORA_SERVICE: postgres}
+    volumes:
+      - pg:/var/lib/postgresql/data/pg
+      - trust:/var/lib/postgresql/data/trust
+      - broker_credentials:/var/lib/postgresql/data/broker
+      - connect_credentials:/var/lib/postgresql/data/connector
+      - spark_credentials:/var/lib/postgresql/data/reader-auth
+    cpus: 1
+    mem_limit: 768m
+  kafka:
+    <<: *runtime
+    container_name: stokora-kafka
+    command: [kafka]
+    environment: {STOKORA_SERVICE: kafka}
+    depends_on:
+      postgres: {condition: service_healthy}
+    volumes:
+      - broker_credentials:/var/lib/postgresql/data/broker:ro
+      - trust:/var/lib/postgresql/data/trust:ro
+      - kafka:/var/lib/stokora-kafka
+    cpus: 1
+    mem_limit: 1024m
+  connect:
+    <<: *runtime
+    container_name: stokora-connect
+    command: [connect]
+    environment: {STOKORA_SERVICE: connect}
+    depends_on:
+      postgres: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+    volumes:
+      - connect_credentials:/var/lib/postgresql/data/connector:ro
+      - trust:/var/lib/postgresql/data/trust:ro
+    cpus: 1
+    mem_limit: 1024m
+  spark:
+    <<: *runtime
+    container_name: stokora-spark
+    command: [spark]
+    environment: {STOKORA_SERVICE: spark}
+    depends_on:
+      connect: {condition: service_healthy}
+    volumes:
+      - spark_credentials:/var/lib/postgresql/data/reader-auth:ro
+      - trust:/var/lib/postgresql/data/trust:ro
+      - stream:/var/lib/postgresql/data/reader
+      - batch:/var/lib/postgresql/data/batch
+      - gold:/var/lib/postgresql/data/jobs
+      - forecast:/var/lib/postgresql/data/forecast
+    cpus: 2
+    mem_limit: 3328m
+networks:
+  data: {internal: true}
+volumes:
+  pg:
+  kafka:
+  trust:
+  broker_credentials:
+  connect_credentials:
+  spark_credentials:
+  stream:
+  batch:
+  gold:
+  forecast:

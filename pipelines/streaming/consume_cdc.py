@@ -3,6 +3,7 @@
 import argparse
 import fcntl
 import json
+import os
 from pathlib import Path
 import signal
 from uuid import uuid4
@@ -13,7 +14,7 @@ from pipelines.storage.bronze import JARS
 from pipelines.streaming.merge_bronze import TOPIC, merge_batch
 from pipelines.streaming.source import KAFKA, bind, lookup
 
-ROOT = Path("/home/jovyan/work")
+ROOT = Path(os.environ.get("STOKORA_STREAM_ROOT", "/home/jovyan/work"))
 EXTRA = ("spark-sql-kafka-0-10_2.13-4.0.0.jar", "spark-token-provider-kafka-0-10_2.13-4.0.0.jar",
          "kafka-clients-3.9.2.jar", "commons-pool2-2.12.0.jar")
 

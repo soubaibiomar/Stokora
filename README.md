@@ -1,35 +1,57 @@
 # STOKORA
 
-STOKORA est un projet de prévision de la demande en magasin. Il rapproche des ventes importées en batch et des changements capturés dans PostgreSQL, puis construit une série quotidienne par tenant, magasin et produit. Les données synthétiques permettent de vérifier le rejeu, les corrections tardives et les prévisions sans utiliser les ventes réelles de M5.
+STOKORA transforme des ventes synthétiques en prévisions quotidiennes par tenant, magasin et produit. Le projet Docker Compose **stokora-local** exécute quatre services dédiés sur un réseau privé. Le profil cible la démonstration et le développement académique sur une seule machine.
 
-## Parcours d’une vente
+~~~mermaid
+flowchart LR
+  subgraph S[stokora-local]
+    P[stokora-postgres] --> C[stokora-connect]
+    C --> K[stokora-kafka]
+    K --> J[stokora-spark]
+    J --> D[Delta Bronze, Silver, Gold]
+    D --> F[Prévisions à sept jours]
+  end
+~~~
 
-| Couche | Rôle |
-|---|---|
-| Collecte | Les imports CSV et les événements PostgreSQL capturés par Debezium et Kafka alimentent deux chemins distincts. |
-| Bronze | Spark conserve les entrées, leur provenance et les rejets dans Delta Lake. Les événements Kafka gardent leur identité et leur position. |
-| Silver et Gold | La réconciliation contrôle les clés, les conflits de calendrier et les droits du tenant. Gold agrège les quantités quotidiennes. |
-| Prévision | Les variables sont calculées à la date d’origine. Trois références prédisent les sept jours suivants à partir de la dernière observation, de la semaine précédente ou d’une moyenne mobile. |
+## Démarrer
 
-## Essai local sur données synthétiques
+Docker Desktop en mode Linux amd64, Docker Compose v2 et PowerShell 7. Prévoir au moins 8 Gio de mémoire pour le moteur Docker et un noyau Linux compatible avec Landlock réseau (ABI 4+). Le premier build récupère des dépendances publiques épinglées. Les traitements utilisent le CPU. Python, Java, Spark et PostgreSQL sont fournis par Docker.
 
-Depuis la racine du dépôt, avec Python et PowerShell, les commandes suivantes installent la dépendance de validation des contrats et exécutent les tests du générateur et de l’adaptateur. Docker et les fichiers M5 réels ne sont pas nécessaires pour cet essai.
+~~~powershell
+./scripts/stokora.ps1 build
+./scripts/stokora.ps1 up
+./scripts/stokora.ps1 status
+./scripts/stokora.ps1 test
+./scripts/stokora.ps1 generate
+./scripts/stokora.ps1 pipeline
+./scripts/stokora.ps1 forecast
+~~~
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python -m pip install -r requirements-step02.txt
-.\.venv\Scripts\python -m unittest discover -s tests/data -v
-```
+Le fichier canonique est infra/compose/local.yml. Le générateur applique la graine 42 une seule fois. Le pipeline effectue la lecture CDC, publie Bronze/Silver/Gold et vérifie la correction du calendrier. La prévision publie un manifeste et ses métriques dans le volume dédié. La commande recover vérifie une interruption après le commit Delta puis un rejeu depuis le début sur des fichiers temporaires.
 
-Pour générer un petit jeu de transactions reproductible, choisir un répertoire de sortie neuf.
+## Exploitation
 
-```powershell
-.\.venv\Scripts\python -m pipelines.generators.transactions --seed 42 --output data/local/sim-42
-```
+~~~powershell
+./scripts/stokora.ps1 logs
+./scripts/stokora.ps1 stop
+./scripts/stokora.ps1 restart
+./scripts/verify_local_compose.ps1
+~~~
 
-## Résultats vérifiés sur la fixture figée
+Un second lancement réutilise les services de stokora-local. Les tests et les traitements exécutent des commandes dans Spark. L’arrêt préserve les données. Les volumes nommés stockent séparément PostgreSQL, la métadonnée et les offsets Kafka, les identités TLS, les checkpoints, les tables Delta et la prévision. Le provisionnement de la nouvelle instance échoue si son format est partiel ou inconnu. La destruction d’un volume retire les données correspondantes.
 
-La comparaison porte sur **783 origines**, **16 443 lignes de prévision** et **800 prévisions de test évaluées par méthode**. La MAE est exprimée en unités de vente. La WAPE est rapportée au volume observé.
+| Service | Ressources maximales |
+|---|---:|
+| PostgreSQL | 1 CPU et 768 Mio |
+| Kafka | 1 CPU et 1 Gio |
+| Debezium Connect | 1 CPU et 1 Gio |
+| Spark local | 2 CPU et 3 328 Mio |
+
+Kafka utilise SASL_SSL et des ACL par topic et groupe. PostgreSQL vérifie SCRAM via TLS. L’API de gestion Connect exige un certificat client. Le réseau privé n’expose aucun port sur l’hôte. Les certificats locaux expirent après 89 jours. Le superviseur de PostgreSQL initialise les identités des autres services au premier lancement. La séparation des processus et des volumes de données réduit le périmètre des accès courants. Le superviseur de provisionnement reste une frontière de confiance.
+
+## Référence STEP 07
+
+Sur l’entrée Gold figée, la référence couvre 783 origines, 16 443 prévisions et 800 observations évaluées par méthode.
 
 | Méthode | MAE | WAPE |
 |---|---:|---:|
@@ -37,19 +59,4 @@ La comparaison porte sur **783 origines**, **16 443 lignes de prévision** et **
 | Même jour de la semaine précédente | 0,0300 | 0,74 % |
 | Moyenne mobile | 0,7381 | 18,20 % |
 
-Ces mesures décrivent la fixture synthétique. Le benchmark complet dépend des snapshots Gold et des volumes de qualification de la station de référence. Les fichiers du dépôt suffisent pour exécuter l’essai Python ci-dessus.
-
-## État et limites
-
-STEP 07 dispose d’une référence synthétique vérifiée. **STEP 08 et le déploiement restent bloqués** par le contrôle des images de service. Les résultats de CDC, d’isolation et de prévision portent sur les scénarios testés. L’autorisation d’usage de M5 et la disponibilité historique réelle des observations restent ouvertes.
-
-| Pour explorer | Point d’entrée |
-|---|---|
-| Contrats des événements | [Schéma JSON](contracts/events/v1.schema.json) |
-| Modèle opérationnel et capture CDC | [Migrations PostgreSQL](infra/db/migrations/) · [Connecteur](infra/kafka/connectors/) |
-| Imports, quarantaine et rejeu | [Batch](pipelines/batch/) · [Streaming](pipelines/streaming/) |
-| Réconciliation et agrégats | [Silver](pipelines/silver/) · [Gold](pipelines/gold/) |
-| Prévisions et hypothèses | [Dictionnaire des variables](docs/ml/feature_dictionary.md) · [Tests temporels](tests/ml/) |
-| Configuration Docker | [Profils Compose](infra/compose/) |
-
-Les identifiants, les volumes de travail et les jeux de ventes réels restent locaux. La licence du dépôt couvre le code publié. Les conditions de réutilisation des données tierces relèvent de leurs fournisseurs.
+**SEC-01 reste PARTIAL et STEP 08 reste BLOCKED.** Les vulnérabilités de l’image empêchent sa promotion. Le droit d’utiliser le jeu M5 réel demeure à confirmer. Le parcours exploite les fixtures synthétiques livrées avec le code. [Guide Docker](reports/infrastructure/DOCKER_LIFECYCLE_GUIDE.md)
